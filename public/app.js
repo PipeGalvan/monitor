@@ -1,5 +1,6 @@
 let sites = new Map()
 let ws = null
+let filterText = ''
 
 function initWebSocket() {
   ws = new WebSocket('ws://localhost:3001/ws')
@@ -55,24 +56,35 @@ function renderSites() {
   const grid = document.getElementById('sitesGrid')
   const emptyState = document.getElementById('emptyState')
   
-  if (sites.size === 0) {
+  let filteredSites = Array.from(sites.values())
+  
+  if (filterText) {
+    filteredSites = filteredSites.filter(site => 
+      site.url.toLowerCase().includes(filterText.toLowerCase())
+    )
+  }
+  
+  if (filteredSites.length === 0) {
     grid.style.display = 'none'
     emptyState.style.display = 'block'
+    emptyState.innerHTML = filterText 
+      ? '<p>🔍 No se encontraron sitios</p><p>Intenta con otro término de búsqueda</p>'
+      : '<p>📭 No hay sitios monitoreados</p><p>Agrega una URL para comenzar a monitorear</p>'
     return
   }
   
   grid.style.display = 'grid'
   emptyState.style.display = 'none'
   
-  grid.innerHTML = Array.from(sites.values()).map(site => `
-    <div class="site-card">
+  grid.innerHTML = filteredSites.map((site, index) => `
+    <div class="site-card" style="animation-delay: ${index * 0.1}s">
       <div class="site-header">
         <span class="site-url">${escapeHtml(site.url)}</span>
-        <button class="delete-btn" onclick="removeSite('${site.id}')">Eliminar</button>
+        <button class="delete-btn" onclick="removeSite('${site.id}')">🗑️ Eliminar</button>
       </div>
       <span class="status-badge ${site.status}">
         <span class="status-dot"></span>
-        ${site.status === 'up' ? 'Activo' : site.status === 'down' ? 'Inactivo' : 'Verificando...'}
+        ${site.status === 'up' ? '🟢 Activo' : site.status === 'down' ? '🔴 Inactivo' : '🟡 Verificando...'}
       </span>
       <div class="site-info">
         <div class="info-item">
@@ -94,6 +106,29 @@ function renderSites() {
       </div>
     </div>
   `).join('')
+  
+  updateStats()
+}
+
+function updateStats() {
+  const statsContainer = document.getElementById('statsContainer')
+  const allSites = Array.from(sites.values())
+  
+  if (allSites.length === 0) {
+    statsContainer.style.display = 'none'
+    return
+  }
+  
+  statsContainer.style.display = 'grid'
+  
+  const upSites = allSites.filter(s => s.status === 'up').length
+  const downSites = allSites.filter(s => s.status === 'down').length
+  const pendingSites = allSites.filter(s => s.status === 'pending').length
+  
+  document.getElementById('totalSites').textContent = allSites.length
+  document.getElementById('upSites').textContent = upSites
+  document.getElementById('downSites').textContent = downSites
+  document.getElementById('pendingSites').textContent = pendingSites
 }
 
 function escapeHtml(text) {
@@ -117,6 +152,11 @@ document.getElementById('addSiteForm').addEventListener('submit', async (e) => {
     await addSite(url)
     urlInput.value = ''
   }
+})
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  filterText = e.target.value.trim()
+  renderSites()
 })
 
 initWebSocket()

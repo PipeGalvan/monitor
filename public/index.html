@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Uptime Monitor</title>
+  <meta name="description" content="Monitor de uptime para múltiples sitios web en tiempo real">
+  <title>⚡ Uptime Monitor</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,17 +20,48 @@
         id="siteUrl" 
         placeholder="https://ejemplo.com" 
         required
+        autocomplete="off"
       >
-      <button type="submit">Agregar</button>
+      <button type="submit">
+        <span>➕ Agregar Sitio</span>
+      </button>
     </form>
+
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="🔍 Buscar sitio..." 
+        autocomplete="off"
+      >
+    </div>
+
+    <div class="stats-container" id="statsContainer" style="display: none;">
+      <div class="stat-item">
+        <div class="stat-value" id="totalSites">0</div>
+        <div class="stat-label">Total Sitios</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value stat-up" id="upSites">0</div>
+        <div class="stat-label">🟢 Activos</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value stat-down" id="downSites">0</div>
+        <div class="stat-label">🔴 Inactivos</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value stat-pending" id="pendingSites">0</div>
+        <div class="stat-label">🟡 Verificando</div>
+      </div>
+    </div>
 
     <div class="sites-grid" id="sitesGrid">
       <!-- Sites will be rendered here -->
     </div>
 
     <div class="empty-state" id="emptyState">
-      <p>No hay sitios monitoreados</p>
-      <p>Agrega una URL para comenzar</p>
+      <p>📭 No hay sitios monitoreados</p>
+      <p>Agrega una URL para comenzar a monitorear</p>
     </div>
   </div>
 
